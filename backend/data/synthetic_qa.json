@@ -1,0 +1,452 @@
+[
+  {
+    "question": "What is required of the vehicle manufacturer according to section 5.1?",
+    "answer": "To draw up a schedule describing all projected combinations of relevant vehicle electronic/electrical systems",
+    "type": "factual",
+    "difficulty": "easy",
+    "source_std": "AIS-004",
+    "source_clause": "5.1",
+    "source_page": 4
+  },
+  {
+    "question": "What type of vehicle systems are considered relevant for immunity related functions?",
+    "answer": "Vehicle electrical/electronic systems or ESAs involved in immunity related functions",
+    "type": "factual",
+    "difficulty": "easy",
+    "source_std": "AIS-004",
+    "source_clause": "5.1",
+    "source_page": 4
+  },
+  {
+    "question": "How is the driver's direct control of the vehicle exercised?",
+    "answer": "By means of steering, braking or engine speed control",
+    "type": "factual",
+    "difficulty": "easy",
+    "source_std": "AIS-004",
+    "source_clause": "5.1",
+    "source_page": 4
+  },
+  {
+    "question": "What are examples of functions related to the direct control of the vehicle?",
+    "answer": "Engine, gear, brake, suspension, active steering, speed limitation devices",
+    "type": "factual",
+    "difficulty": "easy",
+    "source_std": "AIS-004",
+    "source_clause": "5.1",
+    "source_page": 4
+  },
+  {
+    "question": "What are examples of factors that can affect the driver's visibility?",
+    "answer": "Dipped beam, windscreen wiper",
+    "type": "factual",
+    "difficulty": "easy",
+    "source_std": "AIS-004",
+    "source_clause": "5.1",
+    "source_page": 4
+  },
+  {
+    "question": "What is the minimum height of the phase centre of any antenna above the plane on which the vehicle rests if the vehicle roof does not exceed 3 m in height?",
+    "answer": "1.5 m",
+    "type": "factual",
+    "difficulty": "easy",
+    "source_std": "AIS-004",
+    "source_clause": "5.2.1.1",
+    "source_page": 11
+  },
+  {
+    "question": "What is the minimum height of the phase centre of any antenna above the plane on which the vehicle rests if the vehicle roof exceeds 3 m in height?",
+    "answer": "2.0 m",
+    "type": "factual",
+    "difficulty": "easy",
+    "source_std": "AIS-004",
+    "source_clause": "5.2.1.1",
+    "source_page": 11
+  },
+  {
+    "question": "At what height does the vehicle roof need to exceed for the phase centre of any antenna to be at least 2.0 m above the plane on which the vehicle rests?",
+    "answer": "3 m",
+    "type": "factual",
+    "difficulty": "easy",
+    "source_std": "AIS-004",
+    "source_clause": "5.2.1.1",
+    "source_page": 11
+  },
+  {
+    "question": "What is the purpose of specifying a minimum height for the phase centre of any antenna?",
+    "answer": "To ensure the antenna is at a certain height above the plane on which the vehicle rests",
+    "type": "factual",
+    "difficulty": "easy",
+    "source_std": "AIS-004",
+    "source_clause": "5.2.1.1",
+    "source_page": 11
+  },
+  {
+    "question": "Is the phase centre of any antenna allowed to be less than 1.5 m above the plane on which the vehicle rests if the vehicle roof does not exceed 3 m in height?",
+    "answer": "No",
+    "type": "factual",
+    "difficulty": "easy",
+    "source_std": "AIS-004",
+    "source_clause": "5.2.1.1",
+    "source_page": 11
+  },
+  {
+    "question": "At how many spot frequencies shall the tests be performed to confirm that the ESAs meet the requirements of this Annex?",
+    "answer": "up to 14",
+    "type": "factual",
+    "difficulty": "easy",
+    "source_std": "AIS-004",
+    "source_clause": "5.2",
+    "source_page": 24
+  },
+  {
+    "question": "What is the minimum dwell time required to allow the equipment under test to react under normal conditions?",
+    "answer": "two seconds",
+    "type": "factual",
+    "difficulty": "easy",
+    "source_std": "AIS-004",
+    "source_clause": "5.2",
+    "source_page": 24
+  },
+  {
+    "question": "What is the range of frequencies at which the tests shall be performed?",
+    "answer": "27 to 900 MHz",
+    "type": "factual",
+    "difficulty": "easy",
+    "source_std": "AIS-004",
+    "source_clause": "5.2",
+    "source_page": 24
+  },
+  {
+    "question": "What factor of the equipment under test shall be considered when determining the dwell time?",
+    "answer": "response time",
+    "type": "factual",
+    "difficulty": "easy",
+    "source_std": "AIS-004",
+    "source_clause": "5.2",
+    "source_page": 24
+  },
+  {
+    "question": "What section is about the characteristics of the test signal to be generated?",
+    "answer": "6",
+    "type": "factual",
+    "difficulty": "easy",
+    "source_std": "AIS-004",
+    "source_clause": "5.2",
+    "source_page": 24
+  },
+  {
+    "question": "What is the minimum distance from the edge of the ground plane that the faces of the test sample shall be located?",
+    "answer": "200 mm",
+    "type": "factual",
+    "difficulty": "easy",
+    "source_std": "AIS-004",
+    "source_clause": "8.2.2",
+    "source_page": 27
+  },
+  {
+    "question": "What is the minimum distance from the edge of the ground plane that all leads and cables shall be?",
+    "answer": "100 mm",
+    "type": "factual",
+    "difficulty": "easy",
+    "source_std": "AIS-004",
+    "source_clause": "8.2.2",
+    "source_page": 27
+  },
+  {
+    "question": "What is the distance to the ground plane from the lowest point of the harness?",
+    "answer": "50 \u00b1 5 mm",
+    "type": "factual",
+    "difficulty": "easy",
+    "source_std": "AIS-004",
+    "source_clause": "8.2.2",
+    "source_page": 27
+  },
+  {
+    "question": "What type of network shall be used to apply power to the ESA under test?",
+    "answer": "artificial network (AN)",
+    "type": "factual",
+    "difficulty": "easy",
+    "source_std": "AIS-004",
+    "source_clause": "8.2.2",
+    "source_page": 27
+  },
+  {
+    "question": "What are the specifications of the artificial network (AN) used to apply power to the ESA under test?",
+    "answer": "5 \u00b5H / 50 \u2126",
+    "type": "factual",
+    "difficulty": "easy",
+    "source_std": "AIS-004",
+    "source_clause": "8.2.2",
+    "source_page": 27
+  },
+  {
+    "question": "What is the purpose of using a current injection probe in immunity tests?",
+    "answer": "To induce currents directly into a wiring harness",
+    "type": "reasoning",
+    "difficulty": "medium",
+    "source_std": "AIS-004",
+    "source_clause": "10.1",
+    "source_page": 31
+  },
+  {
+    "question": "How are immunity tests carried out using the current injection probe method?",
+    "answer": "By varying the frequency of the induced signals",
+    "type": "reasoning",
+    "difficulty": "medium",
+    "source_std": "AIS-004",
+    "source_clause": "10.1",
+    "source_page": 31
+  },
+  {
+    "question": "Where can the ESA under test be installed during immunity tests?",
+    "answer": "On a ground plane or in a vehicle",
+    "type": "reasoning",
+    "difficulty": "medium",
+    "source_std": "AIS-004",
+    "source_clause": "10.1",
+    "source_page": 31
+  },
+  {
+    "question": "What component is used to pass the cables of the ESA under test through during immunity tests?",
+    "answer": "A coupling clamp",
+    "type": "reasoning",
+    "difficulty": "medium",
+    "source_std": "AIS-004",
+    "source_clause": "10.1",
+    "source_page": 31
+  },
+  {
+    "question": "What specification should be followed when installing the ESA under test in a vehicle during immunity tests?",
+    "answer": "The vehicle design specification",
+    "type": "reasoning",
+    "difficulty": "medium",
+    "source_std": "AIS-004",
+    "source_clause": "10.1",
+    "source_page": 31
+  },
+  {
+    "question": "What was the original purpose of AIS-012 when it was first published in 2004?",
+    "answer": "To cover performance requirements of lighting and light-signalling devices for motor vehicles having more than three wheels, trailers and semi-trailers",
+    "type": "reasoning",
+    "difficulty": "medium",
+    "source_std": "AIS-012",
+    "source_clause": "0.2",
+    "source_page": 4
+  },
+  {
+    "question": "What led to the revision of AIS-012 after its implementation in 2005?",
+    "answer": "Technological advancement in lighting and light-signalling devices and updates in ECE regulations",
+    "type": "reasoning",
+    "difficulty": "medium",
+    "source_std": "AIS-012",
+    "source_clause": "0.2",
+    "source_page": 4
+  },
+  {
+    "question": "How many parts is the revised AIS-012 divided into?",
+    "answer": "Ten parts",
+    "type": "reasoning",
+    "difficulty": "medium",
+    "source_std": "AIS-012",
+    "source_clause": "0.2",
+    "source_page": 4
+  },
+  {
+    "question": "What specific aspect of lighting and light-signalling devices does this part of AIS-012 cover?",
+    "answer": "Performance requirements for reversing lamps for motor vehicles",
+    "type": "reasoning",
+    "difficulty": "medium",
+    "source_std": "AIS-012",
+    "source_clause": "0.2",
+    "source_page": 4
+  },
+  {
+    "question": "In what year was AIS-012 first implemented?",
+    "answer": "2005",
+    "type": "reasoning",
+    "difficulty": "medium",
+    "source_std": "AIS-012",
+    "source_clause": "0.2",
+    "source_page": 4
+  },
+  {
+    "question": "What standard should be referred to for the characteristics of the filament lamp holder?",
+    "answer": "IEC Publication 60061",
+    "type": "reasoning",
+    "difficulty": "medium",
+    "source_std": "AIS-012",
+    "source_clause": "6.5",
+    "source_page": 9
+  },
+  {
+    "question": "What is the minimum luminous intensity required for the light emitted by each lamp in the axis of reference?",
+    "answer": "400 cd",
+    "type": "reasoning",
+    "difficulty": "medium",
+    "source_std": "AIS-012",
+    "source_clause": "6.5",
+    "source_page": 9
+  },
+  {
+    "question": "What document should be consulted to determine the holder data sheet relevant to the category of filament lamp used?",
+    "answer": "AIS-034 (Part 1)(Rev. 1) and its amendments",
+    "type": "reasoning",
+    "difficulty": "medium",
+    "source_std": "AIS-012",
+    "source_clause": "6.5",
+    "source_page": 9
+  },
+  {
+    "question": "What is the purpose of the design requirement that the filament lamp shall be able to be fixed in no other position but the correct one?",
+    "answer": "To ensure the filament lamp is used correctly",
+    "type": "reasoning",
+    "difficulty": "medium",
+    "source_std": "AIS-012",
+    "source_clause": "6.5",
+    "source_page": 9
+  },
+  {
+    "question": "Where can the table of standard light distribution be found to determine the minimum intensity of the light emitted by each lamp?",
+    "answer": "Annex C to this standard",
+    "type": "reasoning",
+    "difficulty": "medium",
+    "source_std": "AIS-012",
+    "source_clause": "6.5",
+    "source_page": 9
+  },
+  {
+    "question": "What is the primary function of a rain flap in relation to other road users?",
+    "answer": "To reduce the risk of small objects being thrown upwards or sideways towards other road users",
+    "type": "reasoning",
+    "difficulty": "medium",
+    "source_std": "AIS-013",
+    "source_clause": "1.3",
+    "source_page": 6
+  },
+  {
+    "question": "Where can a rain flap be mounted on a vehicle?",
+    "answer": "Behind the wheel, on the lower part of the chassis or the loading surface, or on the mudguard",
+    "type": "reasoning",
+    "difficulty": "medium",
+    "source_std": "AIS-013",
+    "source_clause": "1.3",
+    "source_page": 6
+  },
+  {
+    "question": "What type of component is a rain flap?",
+    "answer": "A flexible component",
+    "type": "reasoning",
+    "difficulty": "medium",
+    "source_std": "AIS-013",
+    "source_clause": "1.3",
+    "source_page": 6
+  },
+  {
+    "question": "What type of objects is the rain flap designed to prevent being thrown by the tyres?",
+    "answer": "Small objects, in particular pebbles",
+    "type": "reasoning",
+    "difficulty": "medium",
+    "source_std": "AIS-013",
+    "source_clause": "1.3",
+    "source_page": 6
+  },
+  {
+    "question": "In which direction can small objects be thrown by the tyres if a rain flap is not present?",
+    "answer": "Upwards or sideways towards other road users",
+    "type": "reasoning",
+    "difficulty": "medium",
+    "source_std": "AIS-013",
+    "source_clause": "1.3",
+    "source_page": 6
+  },
+  {
+    "question": "What type of equipment is used to simulate the conditions for testing the porous material, and what specific conditions are being simulated?",
+    "answer": "A pressurized air/water pulverizer is used to simulate the conditions, specifically the volume and speed of the water spray produced by the tyres.",
+    "type": "multi-hop",
+    "difficulty": "hard",
+    "source_std": "AIS-013",
+    "source_clause": "1.0",
+    "source_page": 11
+  },
+  {
+    "question": "What is the purpose of the test, and what type of material is being tested?",
+    "answer": "The purpose of the test is to determine the effectiveness of a porous material, and the material being tested is intended to retain water sprayed by a pressurized air/water pulverizer.",
+    "type": "multi-hop",
+    "difficulty": "hard",
+    "source_std": "AIS-013",
+    "source_clause": "1.0",
+    "source_page": 11
+  },
+  {
+    "question": "What is the context in which the porous material would be used, and what conditions would it be subjected to?",
+    "answer": "The porous material would be used in a vehicle, and it would be subjected to the volume and speed of the water spray produced by the tyres.",
+    "type": "multi-hop",
+    "difficulty": "hard",
+    "source_std": "AIS-013",
+    "source_clause": "1.0",
+    "source_page": 11
+  },
+  {
+    "question": "What is the method used to spray the porous material with water, and what is the purpose of this method?",
+    "answer": "The method used to spray the porous material with water is a pressurized air/water pulverizer, and the purpose of this method is to simulate the conditions to which the material would be submitted if it were fitted to a vehicle.",
+    "type": "multi-hop",
+    "difficulty": "hard",
+    "source_std": "AIS-013",
+    "source_clause": "1.0",
+    "source_page": 11
+  },
+  {
+    "question": "What is the primary goal of the test, and how is the equipment used to achieve this goal?",
+    "answer": "The primary goal of the test is to determine the effectiveness of the porous material, and the equipment used is a pressurized air/water pulverizer that simulates the conditions to which the material would be submitted if it were fitted to a vehicle.",
+    "type": "multi-hop",
+    "difficulty": "hard",
+    "source_std": "AIS-013",
+    "source_clause": "1.0",
+    "source_page": 11
+  },
+  {
+    "question": "What is the minimum width requirement for a flap within mudguards, and where can the specific requirement for 'q' be found?",
+    "answer": "At least equal in width to the tread of the tyre, and the specific requirement for 'q' can be found in Cl. 6.1.1 (c)",
+    "type": "multi-hop",
+    "difficulty": "hard",
+    "source_std": "AIS-013",
+    "source_clause": "6.3.1",
+    "source_page": 16
+  },
+  {
+    "question": "According to Cl. 6.3.1, what is the condition under which the width of the flap does not need to fulfill the 'q' requirement from Cl. 6.1.1 (c)?",
+    "answer": "When the flap is within the mudguards",
+    "type": "multi-hop",
+    "difficulty": "hard",
+    "source_std": "AIS-013",
+    "source_clause": "6.3.1",
+    "source_page": 16
+  },
+  {
+    "question": "Where can the requirement for 'q' be found, and what is the alternative width requirement for a flap within mudguards?",
+    "answer": "The requirement for 'q' can be found in Cl. 6.1.1 (c), and the alternative width requirement for a flap within mudguards is at least equal in width to the tread of the tyre",
+    "type": "multi-hop",
+    "difficulty": "hard",
+    "source_std": "AIS-013",
+    "source_clause": "6.3.1",
+    "source_page": 16
+  },
+  {
+    "question": "Under what condition is the width of the flap required to be at least equal in width to the tread of the tyre, and where is the general requirement for 'q' specified?",
+    "answer": "When the flap is within the mudguards, and the general requirement for 'q' is specified in Cl. 6.1.1 (c)",
+    "type": "multi-hop",
+    "difficulty": "hard",
+    "source_std": "AIS-013",
+    "source_clause": "6.3.1",
+    "source_page": 16
+  },
+  {
+    "question": "What is the width requirement for a flap that is not within the mudguards, and what is the width requirement for a flap that is within the mudguards?",
+    "answer": "The width requirement for a flap that is not within the mudguards is the requirement for 'q' in Cl. 6.1.1 (c), and the width requirement for a flap that is within the mudguards is at least equal in width to the tread of the tyre",
+    "type": "multi-hop",
+    "difficulty": "hard",
+    "source_std": "AIS-013",
+    "source_clause": "6.3.1",
+    "source_page": 16
+  }
+]

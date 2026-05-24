@@ -1,0 +1,25 @@
+# BM25 / retrieval cache
+backend/data/bm25_index.pkl
+*.pkl
+
+# ChromaDB
+backend/data/vector_store/
+backend/data/chroma/
+
+# Uploaded PDFs
+backend/data/pdfs/
+
+# Evaluation outputs
+backend/evaluation_results/
+
+# Python virtual env
+rag-venv/
+
+# Node modules
+frontend/node_modules/
+
+# Next build
+frontend/.next/
+
+# Env files
+.env

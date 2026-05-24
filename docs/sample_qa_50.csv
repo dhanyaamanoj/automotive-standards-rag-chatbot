@@ -1,0 +1,364 @@
+query,expected,generated,retrieved_context,faithfulness,answer_relevance,precision_at_k,recall_at_k,mrr,type,difficulty
+What is the title of the Automotive Industry Standard document?,Electromagnetic Radiated Immunity of Automotive Vehicles – Requirements and Methods of Tests,I could not find information on this in the loaded AIS documents.,"2014 
+ 
+ 
+The AISC panel and the Automotive Industry Standards Committee (AISC) 
+responsible for preparation of this standard are given in Annexure 1 and Annexure 
+2 respectively.
+0.7 
+The Automotive Industry Standards Committee (AISC) responsible for approval 
+of this standard is given in Annex G
+0.4 
+The AISC panel and the Automotive Industry Standards Committee 
+(AISC) responsible for preparation of this standard are given in Annex O 
+and Annex P respectively.
+0.5 
+The AISC panel and Automoti",0.0,0.0,0.0,0.0,0.0,factual,easy
+Who printed the Automotive Industry Standard document?,The Automotive Research Association of India,I could not find information on this in the loaded AIS documents.,"0.4 
+The AISC panel and the Automotive Industry Standards Committee 
+(AISC) responsible for preparation of this standard are given in Annex O 
+and Annex P respectively.
+0.7 
+The Automotive Industry Standards Committee (AISC) responsible for approval 
+of this standard is given in Annex G
+2014 
+ 
+ 
+The AISC panel and the Automotive Industry Standards Committee (AISC) 
+responsible for preparation of this standard are given in Annexure 1 and Annexure 
+2 respectively.
+0.5 
+The AISC panel and Automoti",0.0,0.0,0.0,0.0,0.0,factual,easy
+What is the number of the Automotive Industry Standard document?,AIS-004 (Part 2),"According to the provided context, there are multiple Automotive Industry Standard documents mentioned, including: 
+AIS-009, 
+AIS-008, 
+AIS-013, and 
+AIS-012. 
+
+These are the numbers of the Automotive Industry Standard documents mentioned in the context.","0.7 
+The Automotive Industry Standards Committee (AISC) responsible for approval 
+of this standard is given in Annex G
+0.4 
+The AISC panel and the Automotive Industry Standards Committee 
+(AISC) responsible for preparation of this standard are given in Annex O 
+and Annex P respectively.
+2014 
+ 
+ 
+The AISC panel and the Automotive Industry Standards Committee (AISC) 
+responsible for preparation of this standard are given in Annexure 1 and Annexure 
+2 respectively.
+0.5 
+The AISC panel and Automoti",0.0,0.0,0.0,0.0,0.0,factual,easy
+In which year was the Automotive Industry Standard document printed?,2007,I could not find information on this in the loaded AIS documents.,"0.7 
+The Automotive Industry Standards Committee (AISC) responsible for approval 
+of this standard is given in Annex G
+0.4 
+The AISC panel and the Automotive Industry Standards Committee 
+(AISC) responsible for preparation of this standard are given in Annex O 
+and Annex P respectively.
+2014 
+ 
+ 
+The AISC panel and the Automotive Industry Standards Committee (AISC) 
+responsible for preparation of this standard are given in Annexure 1 and Annexure 
+2 respectively.
+0.5 
+The AISC panel and Automoti",0.0,0.0,0.0,0.0,0.0,factual,easy
+Which government department set up the Automotive Industry Standards Committee?,"Ministry of Shipping, Road Transport & Highways",I could not find information on this in the loaded AIS documents.,"2014 
+ 
+ 
+The AISC panel and the Automotive Industry Standards Committee (AISC) 
+responsible for preparation of this standard are given in Annexure 1 and Annexure 
+2 respectively.
+0.4 
+The AISC panel and the Automotive Industry Standards Committee 
+(AISC) responsible for preparation of this standard are given in Annex O 
+and Annex P respectively.
+0.5 
+ 
+The AISC panel and Automotive Industry Standards Committee (AISC) 
+responsible for preparation of this standard are given in Annex F and 
+Annex ",0.0,0.0,0.0,0.0,0.0,factual,easy
+What is the minimum height of the phase centre of any antenna above the plane on which the vehicle rests if the vehicle roof does not exceed 3 m in height?,1.5 m,"According to AIS-004, Clause 5.2.1.1, the phase centre of any antenna shall not be less than 1.5 m above the plane on which the vehicle rests or not less than 2.0 m above the plane on which the vehicle rests if the vehicle roof exceeds 3 m in height. Since the vehicle roof does not exceed 3 m in height, the minimum height of the phase centre of any antenna above the plane on which the vehicle rests is 1.5 m.","5.2.1.1     The phase centre of any antenna shall not be less than 1.5 m above the 
+plane on which the vehicle rests or not less than 2.0 m above the plane 
+on which the vehicle rests if the vehicle roof exceeds 3 m in height.
+5.4.1  
+For the purposes of this Annex, the reference point is the point at 
+which the field strength shall be established and shall be defined as 
+follows: 
+ 
+5.4.1.1  
+at least 2 m horizontally from the antenna phase centre or at least 1 m 
+vertically from the radiating ",1.0,1.0,0.0,0.0,0.0,factual,easy
+How close can any part of an antenna's radiating elements be to the plane on which the vehicle rests?,No closer than 0.25 m,"According to AIS-004, Clause 5.2.1.2, no part of any antenna's radiating elements shall be closer than 0.25 m to the plane on which the vehicle rests.","5.2.1.2  
+No part of any antenna's radiating elements shall be closer than 0.25 m 
+to the plane on which the vehicle rests.
+5.3.3  
+No part of a TLS, with the exception of the plane on which the vehicle 
+rests, shall be closer than 0.5 m to any part of the vehicle.
+5.4.1  
+For the purposes of this Annex, the reference point is the point at 
+which the field strength shall be established and shall be defined as 
+follows: 
+ 
+5.4.1.1  
+at least 2 m horizontally from the antenna phase centre or at le",1.0,1.0,0.2,1.0,0.25,factual,easy
+What is the typical range of distance for placing the field generating device from the vehicle to approximate in-service conditions?,1 to 5 m,"According to AIS-004, Clause 5.2.2.1, the typical range of distance for placing the field generating device from the vehicle to approximate in-service conditions will typically lie within the range 1 to 5 m. Similarly, this is also stated in AIS-004, Clause 8.3.2.2.1, for approximating in-service conditions for the ESA.","5.2.2.1  
+In-service conditions may be best approximated by placing the field 
+generating device as far from the vehicle as practical. This distance 
+will typically lie within the range 1 to 5 m.
+8.3.2.2.1  In-service conditions may best be approximated by placing the field 
+generating device as far from the ESA as practical. This distance will 
+typically lie within the range 1 to 5 m.
+5.3.4  
+Any field generating device which is placed over the vehicle shall 
+extend centrally over at least 75 %",1.0,1.0,0.0,0.0,0.0,factual,easy
+What is the minimum distance the field generating device's radiating elements should be from any radio absorbent material in an enclosed facility?,1.0 m,"According to AIS-004, Clause 8.3.2.2.2, the field generating device's radiating elements (or antenna's radiating elements) shall be no closer than 0.5 m to any radio absorbent material in an enclosed facility. Additionally, a similar requirement is also mentioned in AIS-004, Clause 5.2.2.2, which states that the field generating device's radiating elements shall be no closer than 1.0 m to any radio absorbent material. However, the more specific and relevant clause for this context is 8.3.2.2.2, which specifies a minimum distance of 0.5 m. 
+
+Therefore, the minimum distance is 0.5 m, as per AIS-004, Clause 8.3.2.2.2.","5.2.2.2  
+If the test is carried out in an enclosed facility, the field generating 
+device's radiating elements shall be no closer than 1.0 m to any radio 
+absorbent material and no closer than 1.5 m to the wall of the enclosed 
+facility. There shall be no absorbent material between the transmitting 
+antenna and the vehicle under test.
+8.3.3.1  
+The field generating device's radiating elements shall not be closer than 
+0.5 m to the edge of the ground plane.
+5.3.1  
+The field generating device's ",0.8,1.0,0.2,1.0,0.333,factual,easy
+How close can the field generating device's radiating elements be to the outer body surface of the vehicle?,No closer than 0.5 m,"According to AIS-004, Clause 5.3.1, the field generating device's radiating elements shall not be closer than 0.5 m to the outer body surface of the vehicle.","5.3.1  
+The field generating device's radiating elements shall not be closer than 
+0.5 m to the outer body surface of the vehicle.
+8.3.3.1  
+The field generating device's radiating elements shall not be closer than 
+0.5 m to the edge of the ground plane.
+5.2.2.2  
+If the test is carried out in an enclosed facility, the field generating 
+device's radiating elements shall be no closer than 1.0 m to any radio 
+absorbent material and no closer than 1.5 m to the wall of the enclosed 
+facility. There ",1.0,1.0,0.2,1.0,1.0,factual,easy
+What is the minimum distance the stripline should be placed away from walls and metallic enclosures?,2 m,"According to AIS-004, Clause 7.3.2.2, the stripline shall be positioned 2 m away from walls and any metallic enclosure to prevent electromagnetic reflections.","7.3.2.2  
+Positioning of Stripline 
+ 
+  
+The stripline shall be housed in a screened room (to prevent external 
+emissions) and positioned 2 m away from walls and any metallic 
+enclosure to prevent electromagnetic reflections. RF absorber material 
+may be used to damp these reflections. The stripline shall be placed on 
+non-conducting supports at least 0.4 m above the floor.
+7.3  
+Installation of the ESA Under Test 
+ 
+7.3.1  150 mm Stripline Testing 
+ 
+  
+The test method allows the generation of ",1.0,1.0,0.2,1.0,1.0,factual,easy
+What material may be used to damp electromagnetic reflections?,RF absorber material,"According to AIS-004, Clause 7.3.2.2, RF absorber material may be used to damp electromagnetic reflections.","7.3.2.2  
+Positioning of Stripline 
+ 
+  
+The stripline shall be housed in a screened room (to prevent external 
+emissions) and positioned 2 m away from walls and any metallic 
+enclosure to prevent electromagnetic reflections. RF absorber material 
+may be used to damp these reflections. The stripline shall be placed on 
+non-conducting supports at least 0.4 m above the floor.
+8.3.2.2.2  If the test is carried out in an enclosed facility, the antenna's radiating 
+elements shall be no closer than 0.",1.0,1.0,0.2,1.0,1.0,factual,easy
+How high above the floor should the stripline be placed?,at least 0.4 m,I could not find information on this in the loaded AIS documents.,"6.10.4.2 
+In Height: 
+ 
+Above the ground, not less than 350mm nor more than 1,500mm 
+(2,100mm if the shape of the bodywork makes it impossible to keep 
+within 1,500mm and if the optional lamps are not installed). If the 
+optional lamps are installed, they shall be placed at a height compatible 
+with the applicable requirements of Clause 6.10.4.1., the symmetry of 
+the lamps, and at a vertical distance as large as the shape of the 
+bodywork makes it possible, but not less than 600mm above the 
+ma",0.0,0.0,0.0,0.0,0.0,factual,easy
+Where should the associated measuring equipment be sited during calibration of the stripline?,outside the screened room,"According to AIS-004, Clause 7.3.2.3, the associated measuring equipment shall be sited outside the screened room during calibration of the stripline.","7.3.2.3  
+Calibration of the Stripline 
+ 
+  
+A field measuring probe shall be positioned within the central 1/3 of 
+the space between the plates with the system under test absent.         
+The associated measuring equipment shall be sited outside the 
+screened room.  At each desired test frequency, a level of power shall 
+be fed into the stripline to produce the required field strength at the 
+probe. This level of forward power, or another parameter directly 
+related to the forward power require",1.0,1.0,0.2,1.0,0.25,factual,easy
+Where should the field measuring probe be positioned during calibration of the stripline?,within the central 1/3 of the space between the plates,"According to AIS-004, Clause 7.3.2.3, the field measuring probe shall be positioned within the central 1/3 of the space between the plates with the system under test absent.","7.3.2.3  
+Calibration of the Stripline 
+ 
+  
+A field measuring probe shall be positioned within the central 1/3 of 
+the space between the plates with the system under test absent.         
+The associated measuring equipment shall be sited outside the 
+screened room.  At each desired test frequency, a level of power shall 
+be fed into the stripline to produce the required field strength at the 
+probe. This level of forward power, or another parameter directly 
+related to the forward power require",1.0,1.0,0.0,0.0,0.0,factual,easy
+What is the orientation of the plane in relation to the ground plane as per AIS-004 (Part 2) 8.3.4.2?,Perpendicular,"According to AIS-004, Clause 8.3.4.2, the plane is oriented in such a way that it: 
+(i) is perpendicular to the ground plane; 
+(ii) is perpendicular to the edge of the ground plane along which the principal portion of the wiring harness runs; and 
+(iii) bisects the edge of the ground plane and the mid-point of the principal portion of the wiring harness.","8.3.4.2  
+On a plane which: 
+ 
+(i)   is perpendicular to the ground plane; 
+ 
+(ii)  is perpendicular to the edge of the ground plane along which       
+the principal portion of the wiring harness runs; and 
+ 
+(iii) bisects the edge of the ground plane and the mid-point of             
+the principal portion of the wiring harness; 
+ 
+(iv) coincident with the mid-point of the principal portion of              
+the harness which runs along the edge of the ground plane closest 
+to the antenna. 
+ 
+8.3",1.0,1.0,0.0,0.0,0.0,factual,easy
+What is the distance above the ground plane as specified in AIS-004 (Part 2) 8.3.4.3?,150 ± 10 mm,"According to AIS-004, Clause 8.3.4.3, the distance above the ground plane is 150 ± 10 mm.","AIS - 004 / 1999
+7.7. Measuring  location   for  tests  on  ESA
+       The  test  site  shall  meet  the conditions  laid  down  in  Publication  No.
+16, edition 2, of the International Special Committee on Radio Interference
+(CISPR). Fig. 10.
+ The measuring set, test hut or vehicle in which the measurement set is
+located shall be  outside the boundary shown in Fig 10.
+ Enclosed testing installation may be used for the tests, provided that
+correlation can, be shown between these installations an",1.0,0.0,0.0,0.0,0.0,factual,easy
+What method shall be used to establish the test field strength necessary as per AIS-004 (Part 2) 8.4.1?,The substitution method,"According to AIS-004, Clause 8.4.1, the ""substitution method"" shall be used to establish the test field strength necessary.","8.4  
+Generation of Required Field Strength: Test Methodology 
+ 
+8.4.1  the ""substitution method"" shall be used to establish the test field strength 
+necessary.
+AIS-004 (Part 2) 
+ 
+7.  
+GENERATION OF REQUIRED FIELD STRENGTH 
+ 
+7.1.  
+Test Methodology 
+ 
+7.1.1.  The ""substitution method"" shall be used to obtain the necessary test field 
+strength. 
+ 
+7.1.2.  Calibration Phase 
+ 
+  
+At each test frequency, a level of power shall be fed into the field 
+generating device to produce the required field",1.0,1.0,0.0,0.0,0.0,factual,easy
+Where should the level of power be fed to produce the required field strength as per AIS-004 (Part 2) 8.4.2?,The field generating device,"According to AIS-004, Clause 8.4.2, the level of power shall be fed into the field generating device to produce the required field strength at the reference point in the test area with the ESA under test absent.","AIS-004 (Part 2) 
+ 
+7.  
+GENERATION OF REQUIRED FIELD STRENGTH 
+ 
+7.1.  
+Test Methodology 
+ 
+7.1.1.  The ""substitution method"" shall be used to obtain the necessary test field 
+strength. 
+ 
+7.1.2.  Calibration Phase 
+ 
+  
+At each test frequency, a level of power shall be fed into the field 
+generating device to produce the required field strength at the reference 
+point (as defined in paragraph 5) in the test area with the vehicle absent, 
+the level of forward power, or another parameter directl",1.0,1.0,0.0,0.0,0.0,factual,easy
+What should be measured and recorded at each desired test frequency as per AIS-004 (Part 2) 8.4.2?,The level of forward power or another parameter directly related to it,"I could not find information on this in the loaded AIS documents. The provided context does not contain information about AIS-004 (Part 2) 8.4.2. However, according to AIS-004, Clause 7.1.2, at each test frequency, a level of power shall be fed into the field generating device to produce the required field strength at the reference point, and the level of forward power, or another parameter directly related to the forward power required to define the field, shall be measured and the results recorded.","AIS-004 (Part 2) 
+ 
+7.  
+GENERATION OF REQUIRED FIELD STRENGTH 
+ 
+7.1.  
+Test Methodology 
+ 
+7.1.1.  The ""substitution method"" shall be used to obtain the necessary test field 
+strength. 
+ 
+7.1.2.  Calibration Phase 
+ 
+  
+At each test frequency, a level of power shall be fed into the field 
+generating device to produce the required field strength at the reference 
+point (as defined in paragraph 5) in the test area with the vehicle absent, 
+the level of forward power, or another parameter directl",0.5,0.5,0.0,0.0,0.0,factual,easy
+A vehicle manufacturer changes the bumper design by increasing the mass by 5% and decreasing the thickness by 15%. What action should be taken according to AIS-006 standards?,The bumper needs to be retested because the decrease in thickness is more than 10%.,"According to AIS-006 Cl.5.1 (p.4), in case of changes, the verification for bumper fitment shall be carried out for establishing compliance of the changed parameters to the requirements specified in this standard. 
+
+Since the mass increase is only 5%, it does not trigger the condition specified in AIS-006 Cl.5.1.1 (p.5) which requires verification for an increase in mass of the bumper by more than 10%. 
+
+However, the decrease in thickness by 15% is a change that may require verification for bumper fitment as per AIS-006 Cl.5.1 (p.4), but the specific condition for thickness change is not mentioned in the provided context.
+
+According to AIS-006 Cl.6.1 (p.5), every modification pertaining to the information declared in accordance with paragraph 2.0 of Annexure I related to bumper mounting shall be intimated by the manufacturer to the certifying agency. 
+
+Therefore, the vehicle manufacturer should intimate the certifying agency about the changes made to the bumper design, including the decrease in thickness, as per AIS-006 Cl.6.1 (p.5). Verification for bumper fitment may also be required as per AIS-006 Cl.5.1 (p.4), but the specific conditions for thickness change are not specified in the provided context.","6.1 
+Every modification pertaining to the information declared in accordance 
+with paragraph 2.0 of Annexure I related to bumper mounting shall be 
+intimated by the manufacturer to the certifying agency.
+5.1.1 Any increase in mass of the bumper by more than 10%,
+5.1 
+In case of the following changes, the verification for bumper fitment shall 
+be carried out for establishing compliance of the changed parameters to the 
+requirements specified in this standard. 
+ 
+1/8
+AIS-006 document summary. Topi",0.8,1.0,0.0,0.0,0.0,reasoning,medium
+"If a bumper vendor manufactures bumpers for the same vehicle manufacturer's proprietary design, do they need to be tested separately?","No, they do not need to be tested separately.","According to AIS-006, Clause 5.1.5, bumpers manufactured by different bumper vendors for the same vehicle manufacturer's proprietary design need not be tested.","5.1.5 Reduction in the number of fasteners, 
+ 
+Note: Bumpers manufactured by different bumper vendors for the same 
+vehicle manufacturer’s proprietary design need not be tested.
+4.2 
+Specifications of paragraph 4.1 above are deemed to be met if the vehicle 
+equipped with the same design of bumpers and their anchorages complies 
+with the specifications of paragraph 6 of ECE regulation No. R 42,        
+(Apr. / 2002).
+5.2 
+If the component is manufactured by different sources to the same type 
+app",1.0,1.0,0.0,0.0,0.0,reasoning,medium
+A manufacturer changes the bumper's fasteners from 10 to 8. What should be done according to AIS-006 standards?,The bumper needs to be retested because the number of fasteners has been reduced.,"According to AIS-006, Cl.5.1 (p.4), in case of changes, the verification for bumper fitment shall be carried out for establishing compliance of the changed parameters to the requirements specified in this standard. Since the change is in the number of fasteners, which is related to the provisions of the standard, the verification is required.
+
+Additionally, AIS-006, Cl.5.1.5 (p.5) specifically mentions ""Reduction in the number of fasteners"", implying that this type of change is considered a modification that requires verification.
+
+Therefore, the manufacturer should carry out the verification for bumper fitment to ensure compliance with the requirements specified in AIS-006. 
+
+It is also recommended to refer to AIS-004, Cl.8.1 (p.7) which states that every modification pertaining to the information, even if the changes are not technical in nature, shall be intimated by the manufacturer to the certifying agency. The testing agency which has issued the certificate of compliance shall then consider whether further action is required.","5.1 
+In case of the following changes, the verification for bumper fitment shall 
+be carried out for establishing compliance of the changed parameters to the 
+requirements specified in this standard. 
+ 
+1/8
+8.1 
+Every modification pertaining to the information, even if the changes are 
+not technical in nature declared in accordance with 7.0, shall be intimated 
+by the manufacturer to the certifying agency. 
+ 
+  
+If the changes are in parameters not related to the provisions, no further 
+action w",0.8,1.0,0.0,0.0,0.0,reasoning,medium
+"If a component is manufactured by different sources to the same type-approved design, what is required for granting an extension to the approval?",No retesting is required.,"According to AIS-006, Clause 5.2, if the component is manufactured by different sources to the same type-approved design, no retesting is required for granting extension to the approval.","5.2 
+If the component is manufactured by different sources to the same type 
+approved design, no retesting is required for granting extension to the 
+approval.
+5.0 
+CRITERIA FOR EXTENSION OF APPROVAL
+15.4 
+Extension of Approvals for engineering and administrative changes:
+16.4 
+Extension of Approvals for engineering and administrative changes:
+22.4 
+Extension of Approvals for engineering and administrative changes:",1.0,1.0,0.0,0.0,0.0,reasoning,medium
+A manufacturer makes a modification to the bumper mounting that is not related to the provisions. What action should be taken?,No further action needs to be taken.,"According to AIS-006, Clause 6.1, the manufacturer is required to intimate the certifying agency about every modification pertaining to the information declared in accordance with paragraph 2.0 of Annexure I related to bumper mounting. However, since the modification is not related to the provisions, it can be inferred that this clause may not be directly applicable.
+
+But, since the context does not explicitly state the action to be taken for modifications not related to the provisions, I could not find information on this in the loaded AIS documents.","6.1 
+Every modification pertaining to the information declared in accordance 
+with paragraph 2.0 of Annexure I related to bumper mounting shall be 
+intimated by the manufacturer to the certifying agency.
+5.1 
+In case of the following changes, the verification for bumper fitment shall 
+be carried out for establishing compliance of the changed parameters to the 
+requirements specified in this standard. 
+ 
+1/8
+4.1 
+The bumper of the vehicle under approval shall not show cracks/failures at 
+or aroun",0.8,0.9,0.0,0.0,0.0,reasoning,medium
