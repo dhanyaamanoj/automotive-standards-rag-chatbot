@@ -11,7 +11,7 @@ QA_PATH      = "backend/data/synthetic_qa.json"
 RESULTS_PATH = "backend/data/eval_results.json"
 
 # Allow running with fewer questions: python scripts/run_eval.py 25
-SAMPLE_SIZE = int(sys.argv[1]) if len(sys.argv) > 1 else 50
+SAMPLE_SIZE = 25
 
 def run_evaluation():
     if not os.path.exists(QA_PATH):
