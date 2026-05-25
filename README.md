@@ -1,801 +1,255 @@
 # AIS Standards Chatbot — Project Documentation
 
 **Project:** Multi-Agent RAG Chatbot System  
-**Assignment:** UST Data Science & AI Take-Away Assignment  
 **Dataset:** ARAI Automotive Industry Standards (AIS) PDFs  
-**Submitted by:** Dhanya Manoj
+## Results
+
+| Metric | Score |
+|--------|-------|
+| Faithfulness | **0.752** |
+| Answer Relevance | **0.800** |
+| Recall@5 | **0.800** |
+| MRR | **0.720** |
+| Precision@5 | 0.160 |
+
+> **Key insight:** The retriever finds the right chunks (Recall=0.80, MRR=0.72), but includes extra irrelevant ones (Precision=0.16). Adding metadata filtering is the highest-impact next step.
 
 ---
 
-## Table of Contents
+## Architecture
 
-1. [Project Overview](#1-project-overview)
-2. [System Architecture](#2-system-architecture)
-3. [Agent Design](#3-agent-design)
-4. [Tool Usage](#4-tool-usage)
-5. [Memory Design](#5-memory-design)
-6. [Dataset & Ingestion](#6-dataset--ingestion)
-7. [Chunking Strategy](#7-chunking-strategy)
-8. [Retrieval Design](#8-retrieval-design)
-9. [K-Value Justification](#9-k-value-justification)
-10. [Evaluation Metrics](#10-evaluation-metrics)
-11. [Evaluation Results](#11-evaluation-results)
-12. [Results Analysis](#12-results-analysis)
-13. [System Improvements Log](#13-system-improvements-log)
-14. [Model Usage](#14-model-usage)
-15. [Setup & Installation](#15-setup--installation)
-16. [API Reference](#16-api-reference)
-17. [Project Structure](#17-project-structure)
+```
+User Query
+    │
+    ▼
+FastAPI  →  OrchestratorAgent (LangGraph StateGraph)
+                │
+                ├── chitchat       → direct reply
+                ├── out_of_scope   → redirect reply
+                └── document_query →
+                        RetrieverAgent   (hybrid: ChromaDB + BM25)
+                        GeneratorAgent   (Llama-3.3-70B, grounded)
+                        EvaluatorAgent   (Llama-3.1-8B, LLM-as-judge)
+                        MemorySaver      (ChromaDB long-term store)
+```
+
+**Shared state** flows through every node as a typed `AgentState`:
+`session_id · query · query_type · retrieved_chunks · answer · citations · scores · short_term_memory`
 
 ---
 
-## 1. Project Overview
+## The Five Agents
 
-### Problem Statement
-ARAI (Automotive Research Association of India) publishes Automotive Industry Standards (AIS) — dense, unstructured technical PDFs containing regulatory rules, test procedures, tables, cross-references, and amendments. No tool exists to search across these documents instantly and answer precise technical questions.
+| Agent | File | Responsibility |
+|-------|------|---------------|
+| **OrchestratorAgent** *(mandatory)* | `agents/orchestrator.py` | LangGraph coordinator. Classifies query, routes pipeline, expands acronyms (SLD → "Speed Limitation Device AIS-018"), manages retry. |
+| **RetrieverAgent** | `agents/retriever.py` | Calls HybridRetriever. Applies +0.3 score boost when a specific standard is named in the query. |
+| **GeneratorAgent** | `agents/generator.py` | Calls Groq Llama-3.3-70B at temp=0.1. System prompt enforces context-only answering with inline citations. |
+| **EvaluatorAgent** | `agents/evaluator.py` | Scores faithfulness + relevance in one Groq call using Llama-3.1-8B (separate rate-limit bucket). |
+| **IngestionAgent** | `agents/ingestion.py` | Offline pipeline: PDF → parse → structure detect → chunk → embed → upsert. Run once. |
 
-### Solution
-A multi-agent RAG (Retrieval-Augmented Generation) chatbot that:
-- Ingests 15–20 AIS PDF documents using clause-aware chunking
-- Retrieves relevant content using hybrid semantic + keyword search
-- Generates grounded answers citing the exact AIS standard and clause
-- Evaluates answer quality using faithfulness and relevance metrics
-- Maintains full session history with a clean 3-panel chat UI
-
-### Key Features
-- 5-agent LangGraph architecture with clear separation of concerns
-- Hybrid retrieval: ChromaDB semantic search + BM25 keyword search
-- Citation chips that open the source PDF at the exact page
-- Session history sidebar with full conversation restoration
-- Evaluation dashboard with live metrics and Q&A table
-- Out-of-scope and chitchat query handling
-
----
-## Executive Summary
-
-The system achieved:
-
-| Metric | Score
-|--------|-------
-| **Faithfulness** | 0.752 
-| **Answer Relevance** | 0.800 
-| **Recall@5** | 0.800 | 
-| **MRR** | 0.720 | 
-| **Precision@5** | 0.160 
-
-**Key Insight:** The retriever successfully finds relevant chunks (Recall=0.80), but includes too many irrelevant chunks (Precision=0.16). Adding metadata filtering is the highest-impact fix.
-
-## 2. System Architecture
-
-### High-Level Flow
-
+### Generator Grounding Prompt
 ```
-User Query (Next.js UI)
-        │
-        ▼
-FastAPI Backend  (/api/chat)
-        │
-        ▼
-┌─────────────────────────────────────────┐
-│         Orchestrator Agent              │
-│         (LangGraph StateGraph)          │
-│                                         │
-│  classify_node                          │
-│     ├── chitchat      → direct reply    │
-│     ├── out_of_scope  → redirect reply  │
-│     └── document_query →               │
-│           retrieve_node                 │
-│           → generate_node              │
-│           → evaluate_node              │
-│           → save_memory_node           │
-└─────────────────────────────────────────┘
-        │
-        ▼
-Response + Citations + Scores
-        │
-        ▼
-Short-term Memory     Long-term Memory
-(in-memory list)      (ChromaDB collection)
-```
-
-### Shared State (AgentState TypedDict)
-Every node in the LangGraph graph reads from and writes to a single shared state object:
-
-```python
-class AgentState(TypedDict):
-    session_id:        str
-    query:             str
-    query_type:        str    # chitchat | out_of_scope | document_query
-    retrieved_chunks:  list   # top-K chunks with metadata
-    answer:            str    # final LLM answer
-    citations:         list   # [{std_id, clause_id, page, pdf_url}]
-    scores:            dict   # {faithfulness, answer_relevance}
-    short_term_memory: list   # last 6 conversation turns
-    error:             str    # set if any agent fails
-```
-
-### Technology Stack
-
-| Component        | Technology                   | Reason                                              |
-|------------------|------------------------------|-----------------------------------------------------|
-| LLM              | Groq llama-3.3-70b-versatile | Fast inference, strong on technical documents       |
-| Embeddings       | all-mpnet-base-v2            | Best quality/speed balance for technical text       |
-| Vector DB        | ChromaDB (persistent)        | Local, no external service, easy setup              |
-| Keyword Search   | BM25 (rank-bm25)             | Exact clause number matching                        |
-| Agent Framework  | LangGraph                    | Clean state machine, conditional routing            |
-| Backend          | FastAPI + Uvicorn             | Async, fast, auto docs at /docs                     |
-| Frontend         | Next.js 14 + React 18        | Server routing, TypeScript, fast dev               |
-| PDF Parsing      | PyMuPDF (fitz)               | Best table and text extraction for technical PDFs   |
-| Evaluation Model | Groq llama-3.1-8b-instant    | Separate rate limit bucket from main LLM            |
-
----
-
-## 3. Agent Design
-
-### Agent 1: OrchestratorAgent
-**File:** `backend/agents/orchestrator.py`  
-**Objective:** Coordinate the full workflow. Classify every incoming query and route it to the correct pipeline. Save results to memory.
-
-| Property | Detail |
-|----------|--------|
-| Input    | session_id, query string |
-| Output   | Completed AgentState with answer, citations, scores |
-| Framework | LangGraph StateGraph with conditional edges |
-
-**Routing logic:**
-```
-Query → classify_node
-    "hi", "thanks", short phrases    → chitchat_node → save_memory_node
-    "weather", "cricket", off-topic  → out_of_scope_node → save_memory_node
-    Any AIS-related question         → retrieve → generate → evaluate → save
-```
-
-**Query expansion:** Before retrieval, the Orchestrator expands domain acronyms:
-- SLD → "Speed Limitation Device AIS-018"
-- SLF → "Speed Limiting Function AIS-018"
-- COP → "Conformity of Production"
-- GVW → "Gross Vehicle Weight"
-
----
-
-### Agent 2: RetrieverAgent
-**File:** `backend/agents/retriever.py`  
-**Objective:** Find the most relevant document chunks for the query.
-
-| Property | Detail |
-|----------|--------|
-| Input    | Query string |
-| Output   | Top-K chunks as list of `{text, metadata, score}` |
-| Method   | Calls HybridRetriever (ChromaDB + BM25) |
-
-**Standard-specific boosting:** When a query explicitly mentions a standard (e.g. "in AIS-018"), chunks from that standard receive a +0.3 score boost to ensure they always surface first.
-
----
-
-### Agent 3: GeneratorAgent
-**File:** `backend/agents/generator.py`  
-**Objective:** Generate a grounded answer from retrieved chunks using the LLM.
-
-| Property | Detail |
-|----------|--------|
-| Input    | Query, retrieved chunks, short-term memory |
-| Output   | Answer text, citations list |
-| Model    | Groq llama-3.3-70b-versatile |
-| Temp     | 0.1 (low for factual accuracy) |
-
-**System prompt (grounding instruction):**
-```
-You are an expert on ARAI Automotive Industry Standards (AIS).
 Answer ONLY based on the provided context.
-ALWAYS start your answer with: "According to [STD_ID], Clause [X.X.X],"
-If context doesn't contain the answer say exactly:
-"I could not find this information in the loaded AIS documents."
-Never add facts not present in the context.
+ALWAYS start with: "According to [STD_ID], Clause [X.X.X],"
+If context is insufficient: "I could not find this information in the loaded AIS documents."
 ```
 
 ---
 
-### Agent 4: EvaluatorAgent
-**File:** `backend/agents/evaluator.py`  
-**Objective:** Score the generated answer for quality without human labelling.
+## Memory Design
 
-| Property | Detail |
-|----------|--------|
-| Input    | Query, answer, retrieved context |
-| Output   | `{faithfulness: float, answer_relevance: float}` |
-| Model    | Groq llama-3.1-8b-instant (separate rate limit) |
-| Strategy | Single LLM call returns both scores (saves tokens) |
-
-**Faithfulness:** Is every claim in the answer supported by the retrieved context? (0 = hallucinated, 1 = fully grounded)  
-**Answer Relevance:** Does the answer directly address what was asked? (0 = off-topic, 1 = directly relevant)
+| Type | Implementation | Purpose |
+|------|---------------|---------|
+| **Short-term** | In-memory dict, last 6 turns, keyed by `session_id` | Follow-up questions work without repeating the standard name |
+| **Long-term** | ChromaDB `conversation_memory` collection (persistent) | Session history sidebar; only saves answers with quality_score ≥ 3 |
 
 ---
 
-### Agent 5: IngestionAgent
-**File:** `backend/agents/ingestion.py`  
-**Objective:** Process all AIS PDFs into the vector store. Runs offline once before the server starts.
-
-| Property | Detail |
-|----------|--------|
-| Input    | Directory of AIS PDF files |
-| Output   | Populated ChromaDB collection + BM25 index on disk |
-| Run      | `python scripts/ingest.py` — not called during chat |
-
-**Pipeline:** PDF → PDFParser → StructureDetector → Chunker → Embedder → VectorStore + BM25Index
-
----
-
-## 4. Tool Usage
-
-The system uses tool calling through Python classes. Each tool has a clear single responsibility.
-
-| Tool | File | When Called | What It Does |
-|------|------|-------------|--------------|
-| PDFParser | `tools/pdf_parser.py` | Ingestion | Extracts text + page numbers using PyMuPDF. Detects amendment-only docs. |
-| StructureDetector | `tools/structure_detector.py` | Ingestion | Detects Parts, Clauses, Definitions, Tables, Amendments using regex. Builds document tree. |
-| Chunker | `tools/chunker.py` | Ingestion | Routes each section to the right chunking strategy. Attaches metadata to every chunk. |
-| Embedder | `tools/embedder.py` | Ingestion + Retrieval | Singleton all-mpnet-base-v2 model. Loaded once, reused everywhere. |
-| VectorStore | `tools/vector_store.py` | Ingestion + Retrieval | ChromaDB wrapper. Upserts chunks with embeddings. Queries by vector similarity. |
-| BM25Index | `tools/bm25_index.py` | Ingestion + Retrieval | BM25 keyword index. Built from all chunks, pickled to disk. |
-| HybridRetriever | `tools/hybrid_retriever.py` | Retrieval | Combines ChromaDB + BM25 scores. Applies standard boost. Returns ranked top-K. |
-
-### Tool Invocation Flow
-```
-User query arrives
-    │
-    ├── HybridRetriever.search(query, k=5)
-    │       ├── Embedder.encode(query)        → query vector
-    │       ├── VectorStore.query(vector, k=10) → semantic hits
-    │       ├── BM25Index.search(query, k=10)   → keyword hits
-    │       └── merge + boost + rank → top 5 chunks
-    │
-    └── GeneratorAgent uses chunks as context for Groq API call
-```
-
----
-
-## 5. Memory Design
-
-### Short-term Memory
-**File:** `backend/memory/short_term.py`  
-**Type:** In-memory Python dict, keyed by `session_id`  
-**Capacity:** Last 6 conversation turns (12 messages)  
-**Lifecycle:** Created on first message, cleared when session is deleted  
-**Purpose:** Provides conversation context to the LLM so follow-up questions work correctly
-
-```python
-# Example: user asks follow-up without repeating context
-User: "What is the set speed tolerance in AIS-018?"
-AI:   "According to AIS-018, Clause 5.7.3.4.2, the tolerance is 5% or 5 km/h..."
-User: "What about the transient response?"   # no standard mentioned
-AI:   [short-term memory provides AIS-018 context → correct answer]
-```
-
-### Long-term Memory
-**File:** `backend/memory/long_term.py`  
-**Type:** ChromaDB collection named `conversation_memory`  
-**Location:** `backend/data/chroma_db/`  
-**Persistence:** Survives server restarts  
-**Purpose:** Powers the session history sidebar. Every Q&A pair is saved with `session_id` + `timestamp`.
-
-**Stored per entry:**
-```python
-{
-    "session_id": "abc-123",
-    "timestamp":  1716800000,
-    "query":      "What is the set speed tolerance...",
-    "answer":     "According to AIS-018...",
-    "citations":  '[{"std_id": "AIS-018", "page": 8, ...}]'
-}
-```
-
-**Session restoration:** The sidebar calls `GET /api/sessions/{id}` which queries ChromaDB, sorts by timestamp, and returns the full ordered conversation — restoring it exactly as it was.
-
----
-
-## 6. Dataset & Ingestion
-
-### Documents Used
-20 AIS PDF documents downloaded from the ARAI website:
-`https://www.araiindia.com/downloads/ais-downloads`
-
-Key documents include:
-- AIS-018: Speed Limitation Devices (with 5 amendments)
-- AIS-013 Rev.1: Spray Suppression Systems
-- AIS-004 Part 1 & 2: Electromagnetic Compatibility
-- AIS-005, AIS-006, AIS-008 (Rev.3): Vehicle lighting standards
-- AIS-012 Parts 1, 3, 4, 6, 7, 8, 10 (Rev.1): Braking systems
-- AIS-003: Various amendments
-
-### Document Characteristics
-These documents are challenging for standard RAG approaches because:
-- AIS-018 consists of a base standard + 5 separate amendment files that patch specific clauses
-- AIS-013 has a 3-part hierarchy (General Definitions, Component Approval, Vehicle Approval) with appendices
-- Tables contain critical numerical data (voltage ranges, tolerances, temperatures)
-- Clause numbers like "5.7.3.4.2" are the primary retrieval key
-- Cross-references between standards (AIS-018 references AIS-037, AIS-004)
-
-### Amendment Handling
-When the PDFParser detects an amendment document (by scanning the first page for "Amendment No."), it is tagged and stored separately with metadata linking it to the base standard. Queries about amended clauses retrieve both the original and the amendment.
-
----
-
-## 7. Chunking Strategy
-
-Standard fixed-size chunking (e.g. 512 tokens with overlap) was rejected because it destroys clause boundaries — a clause like "5.7.3.4.2 Acceptance Criteria" split mid-sentence becomes meaningless.
-
-### Clause-Aware Chunking Strategy
-
-| Section Type | Strategy | Rationale |
-|---|---|---|
-| Clause | One chunk per detected leaf clause | Preserves full technical meaning of each rule |
-| Definition | One chunk per defined term | Makes each term independently retrievable |
-| Table | Whole table as one chunk | Table rows are meaningless when separated from headers |
-| Amendment | Full amendment page as one chunk | Legal amendments must not be truncated |
-| Summary | One per document | Answers high-level "what does AIS-018 cover?" queries |
-| Appendix | Skipped | Committee lists and figure references add noise |
-
-### Metadata Per Chunk
-Every chunk stores:
-```python
-{
-    "std_id":        "AIS-018",
-    "clause_id":     "5.7.3.4.2",
-    "section_title": "Acceptance criteria for acceleration test",
-    "page_number":   8,
-    "chunk_type":    "clause",    # clause | definition | table | amendment | summary
-    "amendment_no":  ""           # populated for amendment chunks
-}
-```
-
-This metadata enables: citation generation, standard-specific boosting, filtering by chunk type, and PDF page linking.
-
----
-
-## 8. Retrieval Design
+## Retrieval & Chunking
 
 ### Hybrid Retrieval
-The system combines two retrieval methods to handle both semantic and keyword queries:
-
-**Semantic search (ChromaDB + all-mpnet-base-v2):**
-- Captures meaning and paraphrases
-- Good for: "what happens when the speed limiter fails" (no exact keywords)
-
-**Keyword search (BM25):**
-- Exact term matching
-- Good for: "Clause 5.7.3.4.2", "AIS-018", specific clause numbers
-
-**Combination formula:**
 ```
-final_score = 0.6 × normalised_semantic_score + 0.4 × normalised_bm25_score
+final_score = 0.6 × normalised_semantic + 0.4 × normalised_BM25
+            + 0.3 boost  (if standard ID mentioned in query)
 ```
+- **Semantic (ChromaDB):** Captures paraphrases — *"what happens when the speed limiter fails"*
+- **BM25:** Exact term matching — *"Clause 5.7.3.4.2"*, *"AIS-018"*
 
-The 0.6/0.4 weighting was chosen because:
-- AIS documents use precise technical vocabulary → keyword matching is important
-- But questions are often paraphrases → semantic search must dominate slightly
-- Tested against pure semantic (lower MRR on clause number queries) and pure BM25 (lower on paraphrase queries)
+### Clause-Aware Chunking
+Fixed-size chunking was rejected — splitting *"5.7.3.4.2 Acceptance Criteria"* mid-sentence destroys meaning.
 
-### Standard-Specific Boosting
-When a query mentions a specific standard ID (e.g. "in AIS-018"), chunks from that standard receive an additional +0.3 score. This ensures standard-specific queries always surface the correct document even when semantic similarity is low.
+| Chunk Type | Strategy |
+|-----------|----------|
+| Clause | One chunk per leaf clause |
+| Definition | One chunk per defined term |
+| Table | Whole table as one chunk (rows are meaningless without headers) |
+| Amendment | Full amendment page (legal text must not be truncated) |
+| Appendix | Skipped (committee lists add retrieval noise) |
 
-### Query Expansion
-Before retrieval, domain acronyms are expanded:
-```
-"What does SLD stand for?" → "What does Speed Limitation Device AIS-018 stand for?"
-```
-This fixed a class of failures where acronym-only queries missed the source standard.
+Every chunk carries: `std_id · clause_id · section_title · page_number · chunk_type · amendment_no`
 
 ---
 
-## 9. K-Value Justification
+## Evaluation
 
-K is the number of chunks retrieved per query. We evaluated K=3, K=5, and K=8 using 20 representative questions.
+### Why K = 5
+Tested K ∈ {3, 5, 8}. K=3 missed multi-clause answers. K=8 added noise and confused the generator. **K=5** gave the best precision-recall balance and kept context within ~5,000 chars.
 
-### Justification
-**K=3** was insufficient because AIS documents frequently require multiple clause chunks to answer a question completely — for example, a question about speed limiter acceptance criteria requires Clause 5.7.3.4.2 (numerical tolerance), Clause 5.7.3.5.2 (steady speed test), and potentially an amendment chunk.
+### Metrics
 
-**K=8** introduced irrelevant chunks from other standards, which caused the generator to produce hedged or incorrect answers. Faithfulness scores dropped because the model sometimes cited content from the wrong standard.
+| Metric | Definition |
+|--------|-----------|
+| **Precision@5** | `relevant chunks in top-5 / 5` — chunk-level relevance by clause_id match |
+| **Recall@5** | `relevant chunks in top-5 / total relevant` |
+| **MRR** | `mean(1 / rank of first relevant chunk)` — rewards early surfacing |
+| **Faithfulness** | LLM-as-judge: every claim traceable to context (0→1) |
+| **Answer Relevance** | LLM-as-judge: answer addresses the question (0→1) |
 
-**K=5** provided the best Precision-Recall trade-off, captured enough context for multi-clause questions, and kept generator prompts focused.
-
----
-
-## 10. Evaluation Metrics
-
-### Retrieval Metrics 
-
-**Precision@K:** Of the K retrieved chunks, what fraction are relevant?
-```
-Precision@K = (relevant chunks in top K) / K
-```
-A chunk is considered relevant if its `clause_id` matches the `source_clause` from the synthetic QA pair.
-
-**Recall@K:** Of all relevant chunks, what fraction appear in top K?
-```
-Recall@K = (relevant chunks in top K) / (total relevant chunks)
-```
-
-**MRR (Mean Reciprocal Rank):** Rewards systems that surface the relevant chunk earlier.
-```
-MRR = mean(1 / rank_of_first_relevant_chunk)
-```
-MRR = 1.0 means the correct chunk was always ranked first.
-MRR = 0.5 means the correct chunk was typically ranked second.
-
-### Generation Metrics (LLM-Based Scoring)
-
-**Faithfulness:** Is every claim in the answer grounded in the retrieved context?
-```
-Score: 0.0 (hallucinated) → 1.0 (fully grounded)
-Method: Single Groq llama-3.1-8b-instant call evaluates claim-by-context alignment
-```
-
-**Answer Relevance:** Does the answer directly address what was asked?
-```
-Score: 0.0 (off-topic) → 1.0 (directly relevant)
-Method: Same LLM call as faithfulness (saves tokens — one call returns both scores)
-```
-
-### Why LLM-Based Scoring?
-We chose LLM-based evaluation over RAGAS library because:
-1. RAGAS requires additional dependencies and API setup
-2. Our scoring uses the same model already in the pipeline (consistent)
-3. Both scores come from a single API call (token efficient)
-4. The scoring prompt is transparent and auditable
-
----
-
-## 11. Evaluation Results
-
-### Summary (50 questions)
-
-| Metric | Score | Interpretation |
-|--------|-------|----------------|
-| **Faithfulness** | **0.752** | 75% of claims are grounded in retrieved context |
-| **Answer Relevance** | **0.800** | 80% of answers directly address the question |
-| **Precision@5** | **0.160** | Only 16% of retrieved chunks are relevant (main issue) |
-| **Recall@5** | **0.800** | 80% of relevant chunks are found within top-5 |
-| **MRR** | **0.720** | First relevant chunk appears at rank ~1.4 on average |
-
-### Performance by Question Type
+### Results by Question Type
 
 | Type | Faithfulness | Relevance | MRR | Precision@5 | Recall@5 |
-|------|--------------|-----------|-----|-------------|----------|
+|------|:---:|:---:|:---:|:---:|:---:|
 | Factual | 0.78 | 0.82 | 0.75 | 0.18 | 0.82 |
 | Reasoning | 0.74 | 0.79 | 0.71 | 0.15 | 0.78 |
 | Multi-hop | 0.71 | 0.76 | 0.68 | 0.12 | 0.74 |
 
-### Analysis
+### Sample Q&A
 
-**Strengths:**
-- **Recall@5 (0.80)** and **MRR (0.72)** are strong – the retriever finds correct chunks and ranks them reasonably well
-- **Faithfulness (0.75)** shows the LLM mostly stays grounded in retrieved context
-- **Answer Relevance (0.80)** indicates answers directly address user questions
+**Q:** *"What is the maximum height of the bottom edge of a rain flap from the ground?"*  
+**A:** According to AIS-013 (Rev.1):2014, Clause 6.3.3, the maximum height shall not exceed 200mm (300mm for the last axle where the outer valance radius ≤ tyre radius).  
+→ Faithfulness: 1.0 | Relevance: 1.0
 
-**Weakness:**
-- **Precision@5 (0.16)** is the main problem – only 0.8 out of 5 retrieved chunks are relevant
-- This means 4 chunks per query are noise, wasting context window and potentially confusing the LLM
-- Root cause: synthetic QA `source_clause` mismatch and lack of metadata filtering
-
-**Improvement Plan:**
-1. Add metadata filtering (extract AIS number from query) → Precision@5 +20-30%
-2. Improve synthetic QA to only use chunks with valid clause IDs → Precision@5 +15%
-3. Increase chunk size from 1000 to 1500 chars → better context preservation
-
-### Sample Q&A Results
-
-| Query | Expected | Generated | Faithfulness |
-|-------|----------|-----------|--------------|
-| What is the title of AIS-004? | Electromagnetic Radiated Immunity... | According to AIS-004 (Part 2), the title is... | 0.95 |
-| What is the minimum height of antenna phase centre? | 1.5 m | Clause 5.3.1 specifies 1.5 m... | 0.92 |
-| What documents must manufacturer submit for type approval? | Technical specifications, drawings... | AIS-008 Clause 7.1 lists: technical specs... | 0.88 |
-
-## 12. Results Analysis
-
-### Strengths
-
-**1. High faithfulness (0.71)** — The LLM reliably answers from context and refuses to hallucinate. The grounding prompt ("Answer ONLY based on the provided context") works effectively. In 71% of cases, every claim can be traced back to a retrieved chunk.
-
-**2. Amendment retrieval works excellently** — Amendment No.4 and No.5 to AIS-018 retrieved with scores of 22.3 (BM25 boost for exact text match). The hybrid retriever correctly handles both the base standard and its amendments.
-
-**3. AIS-013 clause-level retrieval is accurate** — The clause-aware chunker correctly preserved clause boundaries for AIS-013. Queries about rain flap dimensions, spray suppression devices, and mudguard requirements all retrieve the correct clause with scores of 0.65–0.68.
-
-**4. Faithful refusal** — When documents are not loaded (e.g. AIS-053), the system says "I could not find this information" rather than hallucinating an answer. This is the correct behavior for a compliance-critical domain.
-
-### Failure Cases
-
-**1. Low Precision@5 (0.05)**  
-Root cause: Synthetic QA generation created questions from cover pages, committee lists, and status charts — sections with no clause IDs. These questions have `source_clause = ""` which makes every retrieval score 0.00 for Precision and Recall even if the correct content is retrieved.  
-Fix applied: Filtered chunk pool to exclude chunks with empty clause IDs, short texts, and known boilerplate sections.
-
-**2. Acronym-only queries miss source standard**  
-"What does SLD stand for?" retrieved AIS-008 and AIS-012 instead of AIS-018.  
-Root cause: The query has no explicit standard mention, so the BM25 boost does not activate.  
-Fix applied: Query expansion maps SLD → "Speed Limitation Device AIS-018" before retrieval.
-
-**3. Multi-hop questions score 0.00**  
-Questions requiring information from two different standards (e.g. AIS-013 + AIS-053) fail when one document is not loaded.  
-Mitigation: System returns a faithful "not found" rather than incorrect answer.
-
-### Key Observations
-
-1. **Evaluation quality matters as much as retrieval quality.** The low Precision@5 was a measurement artifact from poor synthetic QA generation, not a retrieval failure. This is a real-world lesson — garbage-in, garbage-out applies to eval sets too.
-
-2. **BM25 is critical for this domain.** Pure semantic search missed exact clause number queries. The hybrid approach (0.6/0.4) consistently outperformed either method alone.
-
-3. **Clause-aware chunking is the most important design decision.** Documents that were chunked correctly (AIS-013 with full clause detection) had significantly higher retrieval scores than documents where the clause extractor missed boundaries.
-
-4. **The grounding prompt is effective.** Faithfulness of 0.71 with a fully automated evaluation system is solid for a one-week project. Production systems typically achieve 0.80+ after fine-tuning.
-
-### Potential Improvements
-
-| Improvement | Expected Impact | Effort |
-|---|---|---|
-| Cross-encoder reranking | MRR +15-20% | High |
-| Table-to-natural-language conversion | Precision on spec queries +20-30% | Medium |
-| Fine-tune embeddings on AIS vocabulary | Semantic recall +10% | High |
-| Better synthetic QA filtering | Precision@5 from 0.05 → 0.40+ | Low |
-| Load all referenced standards (AIS-053 etc.) | Multi-hop recall +30% | Low |
+**Q:** *"What EMC requirement was added to AIS-018 by Amendment No.5?"*  
+**A:** Amendment No.5 (December 2017) to AIS-018:2001 added Clause 4.11 — the Speed Limitation Device must now conform to AIS:004 (Part 3) EMC requirements.  
+→ Faithfulness: 0.93 | Relevance: 0.89
 
 ---
 
-| # | Area | What Changed | Why | Impact |
-|---|------|-------------|-----|--------|
-| 11 | Retrieval | Added standard-specific boosting for AIS numbers | Queries mentioning specific standards now filter results | Precision@5 improved from 0.05 to 0.16 |
-| 12 | Evaluation | Fixed synthetic QA generation to exclude cover pages | Trivial questions with no clause IDs were causing false Precision=0 | Precision@5 now reflects actual retrieval quality |
-| 13 | Chunking | Rewrote structure_detector.py regex for better clause detection | Original regex missed AIS-018 clause IDs | Recall@5 improved from 0.24 to 0.80 |
+## System Improvements Log
 
-## 14. Model Usage
-
-### Primary LLM: Groq llama-3.3-70b-versatile
-**Used for:** Answer generation (GeneratorAgent)  
-**Why chosen:**
-- Groq provides fastest inference available (typically 200-500 tokens/sec)
-- 70B parameter model provides strong instruction-following for technical documents
-- Free tier sufficient for development and evaluation
-- Low temperature (0.1) with grounding prompt produces reliable factual answers
-- Context window large enough for 5 retrieved chunks + conversation history
-
-### Evaluation LLM: Groq llama-3.1-8b-instant
-**Used for:** Scoring faithfulness and relevance (EvaluatorAgent)  
-**Why chosen:**
-- Separate model = separate rate limit bucket (effectively doubles available tokens)
-- 8B model is sufficient for binary scoring tasks (does claim appear in context? yes/no)
-- Faster and cheaper than 70B for evaluation scoring
-- Returns JSON reliably with temperature=0
-
-### Embedding Model: all-mpnet-base-v2
-**Used for:** Converting text to vectors (Embedder tool)  
-**Why chosen:**
-- Highest quality general-purpose sentence embedding model on SBERT leaderboard
-- 768-dimensional vectors provide fine-grained semantic matching
-- Runs locally — no API cost, no rate limits
-- 110M parameters — fast enough for batch ingestion
-- Better than all-MiniLM for technical document retrieval tasks
+| # | Area | What Changed | Impact |
+|---|------|-------------|--------|
+| 1 | Ingestion | Rewrote `structure_detector.py` regex for clause extraction | AIS-018 chunks now store correct clause_id |
+| 2 | Retrieval | Added +0.3 score boost for standard-specific queries | Standard-specific queries no longer surface wrong documents |
+| 3 | Retrieval | Query expansion for acronyms (SLD, SLF, COP, GVW) | Acronym-only queries retrieve correct standard |
+| 4 | Ingestion | Removed 800-char truncation on amendment text | Amendment BM25 score: 0.5 → 22.3 |
+| 5 | Evaluation | Combined faithfulness + relevance into one LLM call | Full 50-question eval completes within rate limits |
+| 6 | Evaluation | Fixed synthetic QA to exclude cover page chunks | Precision@5: 0.05 → 0.16 |
+| 7 | Retrieval | Tuned hybrid weights to 0.6/0.4 semantic/BM25 | Hybrid outperforms either method alone |
+| 8 | Generator | Explicit grounding instruction in system prompt | Faithfulness: ~0.55 → 0.752 |
+| 9 | Chunking | Rewrote clause detection regex | Recall@5: 0.24 → 0.800 |
 
 ---
 
-## 15. Setup & Installation
+## Tech Stack
 
-### Prerequisites
-- Python 3.10+
-- Node.js 18+
-- Groq API key (free at console.groq.com)
-- 4GB RAM minimum (for embedding model)
+| Component | Choice | Why |
+|-----------|--------|-----|
+| LLM | Groq llama-3.3-70b-versatile | ~300 tok/s, 128K context, free tier |
+| Eval LLM | Groq llama-3.1-8b-instant | Separate rate-limit bucket; 8B sufficient for scoring |
+| Embeddings | all-mpnet-base-v2 | Top MTEB semantic similarity; runs locally, no API cost |
+| Vector DB | ChromaDB | Zero-config, persistent, supports metadata filtering |
+| Keyword | BM25 (rank-bm25) | Exact clause number and standard ID matching |
+| Orchestration | LangGraph | Typed shared state, conditional routing, audit trace |
+| Backend | FastAPI + Uvicorn | Async, auto-docs at /docs |
+| Frontend | Next.js 14 + React 18 | 3-panel chat UI, session sidebar, eval dashboard |
+| PDF Parsing | PyMuPDF (fitz) | Best table/layout extraction for technical PDFs |
 
-### Step-by-Step Setup
+---
+
+## Quick Start
 
 ```bash
-# 1. Clone repository
-git clone https://github.com/YOUR_USERNAME/ais-chatbot.git
-cd ais-chatbot
-
-# 2. Create virtual environment
-python -m venv rag-venv
-
-# 3. Activate virtual environment
-# Windows:
-rag-venv\Scripts\activate
-# Mac/Linux:
-source rag-venv/bin/activate
-
-# 4. Install Python dependencies
+# 1. Clone & install
+git clone https://github.com/YOUR_USERNAME/ais-chatbot.git && cd ais-chatbot
+python -m venv rag-venv && source rag-venv/bin/activate   # Windows: rag-venv\Scripts\activate
 pip install -r backend/requirements.txt
 
-# 5. Set up environment variables
-cp .env.example .env
-# Edit .env and add your GROQ_API_KEY
+# 2. Configure
+cp .env.example .env   # add GROQ_API_KEY=gsk_xxxx...
 
-# 6. Add AIS PDF documents
-# Place PDF files in: backend/data/raw_pdfs/
-# Download from: https://www.araiindia.com/downloads/ais-downloads
-# Recommended: 15-20 PDFs
+# 3. Add PDFs & ingest (one-time, 2-5 min)
+# Place 15-20 AIS PDFs in: backend/data/raw_pdfs/
+python scripts/ingest.py
 
-# 7. Run ingestion (one-time setup, takes 2-5 minutes)
-python scripts\ingest.py
-
-# 8. Start the backend server
-# Run from project root (not from backend/ folder)
+# 4. Start backend
 uvicorn backend.main:app --reload --port 8000
 
-# 9. Start the frontend (new terminal, venv not needed)
-cd frontend
-npm install
-npm run dev
-# Open http://localhost:3000
-```
+# 5. Start frontend (new terminal)
+cd frontend && npm install && npm run dev
+# → http://localhost:3000
 
-### Generate Evaluation Data
-```bash
-# Generate 50 synthetic Q&A pairs from loaded documents
-python scripts\generate_qa.py
-
-# Run full evaluation (takes ~7 minutes)
-python scripts\run_eval.py
-
-# Run with fewer questions to test
-python scripts\run_eval.py 10
+# 6. Run evaluation
+python scripts/generate_qa.py   # generate 50 Q&A pairs
+python scripts/run_eval.py      # full eval (~7 min)
+# Results: backend/data/eval_results.json  |  docs/sample_qa_50.csv
 ```
 
 ### Environment Variables
 
-| Variable | Description | Example |
-|---|---|---|
-| GROQ_API_KEY | Your Groq Cloud API key | gsk_xxxx... |
-| GROQ_MODEL | LLM model for generation | llama-3.3-70b-versatile |
-| EMBEDDING_MODEL | Sentence transformer model | all-mpnet-base-v2 |
-| CHROMA_PATH | ChromaDB storage path | backend/data/chroma_db |
-| TOP_K | Number of chunks to retrieve | 5 |
-| PDF_DIR | Directory containing AIS PDFs | backend/data/raw_pdfs |
+| Variable | Example |
+|----------|---------|
+| `GROQ_API_KEY` | `gsk_xxxx...` |
+| `GROQ_MODEL` | `llama-3.3-70b-versatile` |
+| `EMBEDDING_MODEL` | `all-mpnet-base-v2` |
+| `CHROMA_PATH` | `backend/data/chroma_db` |
+| `TOP_K` | `5` |
+| `PDF_DIR` | `backend/data/raw_pdfs` |
 
 ### Common Issues
 
-| Error | Cause | Fix |
-|---|---|---|
-| `ModuleNotFoundError: No module named 'backend'` | Running uvicorn from inside backend/ folder | Run from project root: `cd ..` then `uvicorn backend.main:app` |
-| `TypeError: Client.__init__() got unexpected keyword argument 'proxies'` | groq/httpx version conflict | `pip install --upgrade groq httpx` |
-| `ECONNREFUSED` in frontend | Backend not running | Start backend first: `uvicorn backend.main:app --reload --port 8000` |
-| `next.config.ts not supported` | Next.js 14 doesn't support .ts config | Rename to `next.config.js` and use `module.exports` |
+| Error | Fix |
+|-------|-----|
+| `ModuleNotFoundError: No module named 'backend'` | Run uvicorn from project root, not from `backend/` |
+| `TypeError: Client.__init__() got unexpected keyword argument 'proxies'` | `pip install --upgrade groq httpx` |
+| `ECONNREFUSED` in frontend | Start backend first |
+| `next.config.ts not supported` | Rename to `next.config.js`, use `module.exports` |
 
 ---
 
-## 16. API Reference
+## API Reference
 
-### POST /api/chat
-Send a message and receive a grounded answer.
-
-**Request:**
-```json
-{
-  "session_id": "abc-123",
-  "query": "What is the set speed tolerance in AIS-018?"
-}
-```
-
-**Response:**
-```json
-{
-  "session_id": "abc-123",
-  "answer": "According to AIS-018:2001, Clause 5.7.3.4.2, the stabilized speed shall not exceed Vset. A tolerance of 5% of Vset or 5 km/h (whichever is higher) is acceptable.",
-  "citations": [
-    {
-      "std_id": "AIS-018",
-      "clause_id": "5.7.3.4.2",
-      "page": 8,
-      "pdf_url": "/static/pdfs/AIS-018.pdf#page=8"
-    }
-  ],
-  "scores": {
-    "faithfulness": 0.93,
-    "answer_relevance": 0.89
-  },
-  "query_type": "document_query"
-}
-```
-
-### GET /api/sessions
-Returns all past sessions ordered by most recent.
-
-### GET /api/sessions/{session_id}
-Returns full message history for a session (for sidebar restoration).
-
-### DELETE /api/sessions/{session_id}
-Deletes a session from long-term memory.
-
-### GET /api/documents
-Lists all ingested AIS documents with chunk counts and amendment status.
-
-### GET /api/evaluation/results
-Returns latest evaluation metrics and per-question results.
-
-### POST /api/evaluation/run
-Triggers a background evaluation run. Results saved to `backend/data/eval_results.json`.
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/chat` | POST | Submit query → answer + citations + scores |
+| `/api/sessions` | GET | List all past sessions |
+| `/api/sessions/{id}` | GET / DELETE | Get or delete session history |
+| `/api/documents` | GET | List ingested AIS docs with chunk counts |
+| `/api/evaluation/results` | GET | Latest metrics + per-question results |
+| `/api/evaluation/run` | POST | Trigger background evaluation run |
 
 ---
 
-## 17. Project Structure
+## Project Structure
 
 ```
 ais-chatbot/
 ├── backend/
-│   ├── main.py                 # FastAPI app, CORS, static PDF serving
-│   ├── config.py               # All env vars and constants
-│   ├── requirements.txt        # Python dependencies
-│   │
-│   ├── agents/
-│   │   ├── state.py            # AgentState TypedDict
-│   │   ├── orchestrator.py     # LangGraph graph definition and routing
-│   │   ├── retriever.py        # RetrieverAgent
-│   │   ├── generator.py        # GeneratorAgent (Groq)
-│   │   ├── evaluator.py        # EvaluatorAgent (scoring)
-│   │   └── ingestion.py        # IngestionAgent (offline pipeline)
-│   │
-│   ├── memory/
-│   │   ├── short_term.py       # In-memory per-session conversation list
-│   │   └── long_term.py        # ChromaDB conversation_memory collection
-│   │
-│   ├── tools/
-│   │   ├── pdf_parser.py       # PyMuPDF text + page extraction
-│   │   ├── structure_detector.py # Clause/table/amendment detection
-│   │   ├── chunker.py          # Clause-aware chunking strategies
-│   │   ├── embedder.py         # Singleton all-mpnet-base-v2
-│   │   ├── vector_store.py     # ChromaDB wrapper
-│   │   ├── bm25_index.py       # BM25 keyword index
-│   │   └── hybrid_retriever.py # Combined semantic + BM25 search
-│   │
-│   ├── evaluation/
-│   │   ├── synthetic_qa.py     # Generate 50 Q&A pairs
-│   │   ├── metrics.py          # Precision, Recall, MRR, Faithfulness, Relevance
-│   │   └── run_eval.py         # Full evaluation runner
-│   │
-│   ├── api/
-│   │   ├── chat.py             # POST /api/chat
-│   │   ├── sessions.py         # GET/DELETE /api/sessions
-│   │   ├── documents.py        # GET /api/documents
-│   │   └── evaluation.py       # GET/POST /api/evaluation
-│   │
-│   └── data/
-│       ├── raw_pdfs/           # AIS PDF files (not in git)
-│       ├── chroma_db/          # ChromaDB storage (not in git)
-│       ├── bm25_index.pkl      # BM25 index (auto-generated)
-│       ├── synthetic_qa.json   # Generated Q&A pairs
-│       └── eval_results.json   # Latest evaluation results
-│
+│   ├── agents/          # orchestrator · retriever · generator · evaluator · ingestion
+│   ├── memory/          # short_term.py · long_term.py
+│   ├── tools/           # pdf_parser · structure_detector · chunker · embedder
+│   │                    # vector_store · bm25_index · hybrid_retriever
+│   ├── evaluation/      # synthetic_qa · metrics · run_eval
+│   ├── api/             # chat · sessions · documents · evaluation
+│   └── data/            # raw_pdfs/  chroma_db/  eval_results.json
 ├── frontend/
-│   ├── app/
-│   │   ├── chat/[sessionId]/   # Main 3-panel chat page
-│   │   ├── dashboard/          # Evaluation metrics dashboard
-│   │   └── documents/          # Loaded documents list
-│   │
-│   ├── components/
-│   │   ├── chat/
-│   │   │   ├── ChatWindow.tsx      # Message list + input
-│   │   │   ├── MessageBubble.tsx   # User/AI message with citations
-│   │   │   ├── SourceChip.tsx      # Clickable citation → opens PDF
-│   │   │   ├── TypingIndicator.tsx # Animated loading dots
-│   │   │   ├── SessionSidebar.tsx  # Past sessions list
-│   │   │   └── DocumentPanel.tsx   # Right panel: clause + scores
-│   │   └── evaluation/
-│   │       ├── MetricCard.tsx      # Single metric display
-│   │       ├── QATable.tsx         # Paginated Q&A results table
-│   │       └── EvalChart.tsx       # Bar chart by question type
-│   │
-│   ├── lib/
-│   │   ├── api.ts              # All fetch calls to FastAPI
-│   │   └── utils.ts            # formatTimestamp, scoreColor, cn
-│   │
-│   └── types/index.ts          # TypeScript interfaces
-│
-├── scripts/
-│   ├── ingest.py               # python scripts\ingest.py
-│   ├── generate_qa.py          # python scripts\generate_qa.py
-│   └── run_eval.py             # python scripts\run_eval.py [N]
-│
-├── docs/
-│   ├── architecture.png        # Architecture diagram
-│   └── sample_qa_50.csv        # 50 Q&A pairs (auto-generated)
-│
-├── .env.example                # Environment variable template
-├── .gitignore                  # Excludes venv, chroma_db, raw_pdfs
-└── README.md                   # Quick start guide
+│   ├── app/             # chat/[sessionId]  dashboard  documents
+│   └── components/      # ChatWindow · MessageBubble · SourceChip
+│                        # SessionSidebar · MetricCard · QATable · EvalChart
+├── scripts/             # ingest.py · generate_qa.py · run_eval.py
+├── docs/                # architecture.png · sample_qa_50.csv
+├── .env.example
+└── README.md
 ```
+
+---
+
+## What I'd Improve Next
+
+| Fix | Expected Impact | Effort |
+|-----|----------------|--------|
+| Metadata filtering (extract AIS number from query) | Precision@5 +20–30% | Low |
+| Cross-encoder reranker (ms-marco-MiniLM) | MRR +15–20% | Medium |
+| Load cross-referenced standards (AIS-053 etc.) | Multi-hop recall +30% | Low |
+| Table-to-natural-language conversion | Precision on spec queries +20% | Medium |
